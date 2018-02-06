@@ -1,6 +1,10 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Engine.Engines;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Sprites;
+using System;
+using System.Collections.Generic;
 
 namespace Game1
 {
@@ -12,6 +16,9 @@ namespace Game1
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        List<SimpleSprite> sprites = new List<SimpleSprite>();
+        static Random rnd = new Random();
+        
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -27,7 +34,7 @@ namespace Game1
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            IsMouseVisible = true;
             base.Initialize();
         }
 
@@ -39,7 +46,15 @@ namespace Game1
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            Texture2D tx = Content.Load<Texture2D>("chaser");
+            new InputEngine(this);
+            for (int i = 0; i < rnd.Next(0,100); i++)
+            {
+               
+                sprites.Add(new SimpleSprite(tx, new Vector2(rnd.Next(0, GraphicsDevice.Viewport.Width - tx.Width), rnd.Next(0, GraphicsDevice.Viewport.Height - tx.Height))));
 
+                sprites[sprites.Count-1].Target = new Vector2(rnd.Next(0, GraphicsDevice.Viewport.Width - tx.Width), rnd.Next(0, GraphicsDevice.Viewport.Height - tx.Height));
+            }
             // TODO: use this.Content to load your game content here
         }
 
@@ -63,7 +78,13 @@ namespace Game1
                 Exit();
 
             // TODO: Add your update logic here
+            foreach (var s in sprites)
+            {
+                s.Update(gameTime,GraphicsDevice.Viewport);
+                
+            }
 
+            sprites.RemoveAll(s => s.IsClicked == true);
             base.Update(gameTime);
         }
 
@@ -74,7 +95,11 @@ namespace Game1
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
+            
+            foreach (var s in sprites)
+            {
+                s.draw(spriteBatch);
+            }
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);
